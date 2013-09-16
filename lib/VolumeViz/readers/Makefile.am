@@ -21,17 +21,10 @@ PrivateHeaders = \
 
 # **************************************************************************
 
-if BUILD_WITH_MSVC
-noinst_LIBRARIES = readers.lst
-else
 noinst_LTLIBRARIES = libreaders.la
-endif
 
 libreaders_la_SOURCES = $(RegularSources)
 EXTRA_libreaders_la_SOURCES = $(PublicHeaders) $(PrivateHeaders)
-
-readers_lst_SOURCES = $(RegularSources)
-EXTRA_readers_lst_SOURCES = $(PublicHeaders) $(PrivateHeaders)
 
 # **************************************************************************
 
@@ -44,11 +37,6 @@ endif
 libreadersinc_HEADERS = $(PublicHeaders)
 
 # **************************************************************************
-
-readers.lst: $(readers_lst_OBJECTS)
-	@echo "Linking $@..."; \
-	rm -f $@; \
-	for i in $(readers_lst_OBJECTS); do echo $$i >>$@; done
 
 install-libreadersincHEADERS: $(libreadersinc_HEADERS)
 	@$(NORMAL_INSTALL)

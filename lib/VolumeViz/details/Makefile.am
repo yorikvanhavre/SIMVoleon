@@ -1,10 +1,6 @@
 DEFAULT_INCLUDES = -I$(top_builddir)/lib -I$(top_srcdir)/lib
 
-if BUILD_WITH_MSVC
-noinst_LIBRARIES = details.lst
-else
 noinst_LTLIBRARIES = libdetails.la
-endif
 
 RegularSources = \
 	VolumeDetail.cpp \
@@ -14,8 +10,6 @@ RegularSources = \
 	ObliqueSliceDetail.cpp
 
 libdetails_la_SOURCES = $(RegularSources)
-
-details_lst_SOURCES = $(RegularSources)
 
 if MAC_FRAMEWORK
 libdetailsincdir = $(MAC_FRAMEWORK_PREFIX)/$(MAC_FRAMEWORK_NAME).framework/Versions/$(MAC_FRAMEWORK_VERSION)/Headers/details
@@ -29,11 +23,6 @@ libdetailsinc_HEADERS = \
 	SoVolumeSkinDetail.h \
 	SoOrthoSliceDetail.h \
 	SoObliqueSliceDetail.h
-
-details.lst: $(details_lst_OBJECTS)
-	@echo "Linking $@..."; \
-	rm -f $@; \
-	for i in $(details_lst_OBJECTS); do echo $$i >>$@; done
 
 install-libdetailsincHEADERS: $(libdetailsinc_HEADERS)
 	@$(NORMAL_INSTALL)

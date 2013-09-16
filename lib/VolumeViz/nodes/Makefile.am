@@ -53,17 +53,10 @@ PrivateHeaders = \
 
 # **************************************************************************
 
-if BUILD_WITH_MSVC
-noinst_LIBRARIES = nodes.lst
-else
 noinst_LTLIBRARIES = libnodes.la
-endif
 
 libnodes_la_SOURCES = $(RegularSources)
 EXTRA_libnodes_la_SOURCES = $(PublicHeaders) $(PrivateHeaders)
-
-nodes_lst_SOURCES = $(RegularSources)
-EXTRA_nodes_lst_SOURCES = $(PublicHeaders) $(PrivateHeaders)
 
 # **************************************************************************
 
@@ -76,11 +69,6 @@ endif
 libnodesinc_HEADERS = $(PublicHeaders)
 
 # **************************************************************************
-
-nodes.lst: $(nodes_lst_OBJECTS)
-	@echo "Linking $@..."; \
-	rm -f $@; \
-	for i in $(nodes_lst_OBJECTS); do echo $$i >>$@; done
 
 install-libnodesincHEADERS: $(libnodesinc_HEADERS)
 	@$(NORMAL_INSTALL)

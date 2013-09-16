@@ -36,6 +36,10 @@
 /* Define if compiler has __builtin_expect() macro */
 #undef HAVE___BUILTIN_EXPECT
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* Name of package */
 #undef PACKAGE
 

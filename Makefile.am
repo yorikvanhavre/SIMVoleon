@@ -13,6 +13,7 @@ HTMLDIRS =
 endif
 
 # **************************************************************************
+ACLOCAL_AMFLAGS = -I cfg/m4
 
 SUBDIRS = bin $(SRCDIRS) $(HTMLDIRS)
 

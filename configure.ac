@@ -14,6 +14,7 @@ AC_INIT([SIM Voleon],
 
 AC_CONFIG_SRCDIR(lib/VolumeViz/nodes/VolumeRendering.cpp)
 AC_CONFIG_AUX_DIR(cfg)
+AC_CONFIG_MACRO_DIR([cfg/m4])
 
 # **************************************************************************
 # If the Microsoft Visual C++ cl.exe compiler is available, set us up for
@@ -28,28 +29,6 @@ AC_SUBST([simvoleon_src_dir])
 AC_SUBST([simvoleon_build_dir])
 
 SIM_AC_RELATIVE_SRC_DIR
-
-SIM_AC_MSVC_DSP_ENABLE_OPTION
-
-# If the Microsoft Visual C++ cl.exe compiler is available, set us up for
-# compiling with it and to generate an MSWindows .dll file.
-
-SIM_AC_SETUP_MSVCPP_IFELSE
-AM_CONDITIONAL(BUILD_WITH_MSVC, $BUILD_WITH_MSVC)
-
-if $BUILD_WITH_MSVC; then
-  SIM_AC_SETUP_MSVCRT([
-    CPPFLAGS="$CPPFLAGS $sim_ac_msvcrt_CPPFLAGS"
-    CFLAGS="$CFLAGS $sim_ac_msvcrt_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $sim_ac_msvcrt_CXXFLAGS"
-    # These are set later, as they should only be set if we're building as
-    # a DLL, and not when building a static lib:
-    #
-    # LDFLAGS="$CFLAGS $sim_ac_msvcrt_LDFLAGS"
-    # LIBS="$CXXFLAGS $sim_ac_msvcrt_LIBS"
-  ])
-  AC_SUBST([SIMVOLEON_MSVC_LIBC], [$sim_ac_msvcrt])
-fi
 
 AC_SUBST([SIMVOLEON_MAJOR_VERSION], [SIMVOLEON_MAJOR])
 AC_SUBST([SIMVOLEON_MINOR_VERSION], [SIMVOLEON_MINOR])
@@ -110,7 +89,7 @@ SIM_AC_UNIVERSAL_BINARIES
 
 # *******************************************************************
 
-AM_INIT_AUTOMAKE(SIMVoleon, $VERSION)
+AM_INIT_AUTOMAKE([subdir-objects])
 
 #  Default to not building a static library. Can be overridden by the
 #  user with --enable-static.
@@ -155,11 +134,6 @@ AC_CHECK_HEADERS([unistd.h sys/types.h])
 
 #  Turn off default maintainer make-rules -- use ./bootstrap instead.
 AM_MAINTAINER_MODE
-
-if $BUILD_WITH_MSVC; then
-  RANLIB=true
-  export RANLIB
-fi
 
 SIM_AC_MAC_CPP_ADJUSTMENTS
 
@@ -398,11 +372,6 @@ if $sim_ac_build_library; then
      ]
   )
 
-  if $SIMVOLEON_STATIC && $BUILD_WITH_MSVC; then
-    # don't link with coin and friends when building SIMVoleon as a static lib
-    LDFLAGS=$sim_ac_configure_save_ldflags
-    LIBS=$sim_ac_configure_save_libs
-  fi
 fi # sim_ac_build_library
 
 # *******************************************************************
@@ -456,68 +425,33 @@ if $sim_ac_win32_declspec_available; then
   fi
 fi
 
-if $BUILD_WITH_MSVC; then
-  rm -f vc60.pdb
-  debugfile="`pwd`/lib/VolumeViz/simvoleon${SIMVOLEON_MAJOR_VERSION}${SUFFIX}.pdb"
-  debugfile=`cygpath -w "$debugfile" | sed 's,\\\\,\\\\\\\\,g'`
-  if $SIMVOLEON_STATIC; then
-    SIM_AC_CONFIGURATION_SETTING([SIM Voleon build type], [static .lib])
-    LIBFLAGS="-LIB $LIBFLAGS"
-    LIBFLAGS="$LIBFLAGS /OUT:simvoleon${SIMVOLEON_MAJOR_VERSION}${SUFFIX}.lib"
-  else
-    LIBFLAGS="-DLL /INCREMENTAL:NO $sim_ac_msvcrt_LIBLDFLAGS $LIBFLAGS"
-    LIBS="$sim_ac_msvcrt_LIBLIBS $LIBS"
-    case $enable_symbols in
-    no | false)
-      SIM_AC_CONFIGURATION_SETTING([SIM Voleon build type],
-                                   [dynamic .dll, no symbols])
-      LIBFLAGS="$LIBFLAGS /RELEASE"
-      ;;
-    *)
-      SIM_AC_CONFIGURATION_SETTING([SIM Voleon build type],
-                                   [dynamic .dll + .pdb])
-      CFLAGS="/Fd$debugfile -g $CFLAGS"
-      CXXFLAGS="/Fd$debugfile -g $CXXFLAGS"
-      LIBFLAGS="$LIBFLAGS /DEBUG /PDB:simvoleon${SIMVOLEON_MAJOR_VERSION}${SUFFIX}.pdb"
-      ;;
-    esac
+SIMVOLEON_EXTRA_LIBS="-lSimVoleon${SUFFIX} $SIMVOLEON_EXTRA_LIBS"
 
-    LIBFLAGS="$LIBFLAGS /OUT:simvoleon${SIMVOLEON_MAJOR_VERSION}${SUFFIX}.dll"
+if $sim_ac_framework; then
+  # setup for SIMVoleon usage
+  SIMVOLEON_EXTRA_CPPFLAGS=
+  if test x"$sim_ac_framework_prefix" != x"MAC_FRAMEWORK_PREFIX_DEFAULT"; then
+    SIMVOLEON_EXTRA_CPPFLAGS="-F$sim_ac_framework_prefix"
   fi
-  SIM_AC_CONFIGURATION_SETTING([C library type], [$sim_ac_msvcrt])
-
-  SIMVOLEON_EXTRA_LIBS="-lsimvoleon${SIMVOLEON_MAJOR_VERSION}${SUFFIX} $SIMVOLEON_EXTRA_LIBS"
-else
-  SIMVOLEON_EXTRA_LIBS="-lSimVoleon${SUFFIX} $SIMVOLEON_EXTRA_LIBS"
-
-  if $sim_ac_framework; then
-    # setup for SIMVoleon usage
-    SIMVOLEON_EXTRA_CPPFLAGS=
-    if test x"$sim_ac_framework_prefix" != x"MAC_FRAMEWORK_PREFIX_DEFAULT"; then
-      SIMVOLEON_EXTRA_CPPFLAGS="-F$sim_ac_framework_prefix"
-    fi
-    SIMVOLEON_EXTRA_CFLAGS=
-    SIMVOLEON_EXTRA_CXXFLAGS=
-    SIMVOLEON_EXTRA_FP_LDFLAGS=
-    if test x"$sim_ac_framework_prefix" != x"MAC_FRAMEWORK_PREFIX_DEFAULT"; then
-      SIMVOLEON_EXTRA_FP_LDFLAGS="-Wl,-F$sim_ac_framework_prefix"
-    fi
-    SIMVOLEON_EXTRA_LDFLAGS="-Wl,-multiply_defined,suppress $SIMVOLEON_EXTRA_FP_LDFLAGS -Wl,-framework,VolumeViz"
-    SIMVOLEON_EXTRA_LIBS=
-    # adjust for Coin usage
-    SIMVOLEON_EXTRA_CPPFLAGS="$SIMVOLEON_EXTRA_CPPFLAGS $sim_ac_coin_cppflags"
-    SIMVOLEON_EXTRA_CFLAGS="$SIMVOLEON_EXTRA_CFLAGS $sim_ac_coin_cflags"
-    SIMVOLEON_EXTRA_CXXFLAGS="$SIMVOLEON_EXTRA_CXXFLAGS $sim_ac_coin_cxxflags"
-    SIMVOLEON_EXTRA_LDFLAGS="$SIMVOLEON_EXTRA_LDFLAGS $sim_ac_coin_ldflags"
-    SIMVOLEON_EXTRA_LIBS="$sim_ac_coin_libs $SIMVOLEON_EXTRA_LIBS"
-  fi # sim_ac_framework
-fi
+  SIMVOLEON_EXTRA_CFLAGS=
+  SIMVOLEON_EXTRA_CXXFLAGS=
+  SIMVOLEON_EXTRA_FP_LDFLAGS=
+  if test x"$sim_ac_framework_prefix" != x"MAC_FRAMEWORK_PREFIX_DEFAULT"; then
+    SIMVOLEON_EXTRA_FP_LDFLAGS="-Wl,-F$sim_ac_framework_prefix"
+  fi
+  SIMVOLEON_EXTRA_LDFLAGS="-Wl,-multiply_defined,suppress $SIMVOLEON_EXTRA_FP_LDFLAGS -Wl,-framework,VolumeViz"
+  SIMVOLEON_EXTRA_LIBS=
+  # adjust for Coin usage
+  SIMVOLEON_EXTRA_CPPFLAGS="$SIMVOLEON_EXTRA_CPPFLAGS $sim_ac_coin_cppflags"
+  SIMVOLEON_EXTRA_CFLAGS="$SIMVOLEON_EXTRA_CFLAGS $sim_ac_coin_cflags"
+  SIMVOLEON_EXTRA_CXXFLAGS="$SIMVOLEON_EXTRA_CXXFLAGS $sim_ac_coin_cxxflags"
+  SIMVOLEON_EXTRA_LDFLAGS="$SIMVOLEON_EXTRA_LDFLAGS $sim_ac_coin_ldflags"
+  SIMVOLEON_EXTRA_LIBS="$sim_ac_coin_libs $SIMVOLEON_EXTRA_LIBS"
+fi # sim_ac_framework
 
 # *******************************************************************
 
 AC_SUBST([COMPILER], ["$CXX"])
-# don't report source hierarchy path to wrapmsvc.exe from simvoleon-config
-if $BUILD_WITH_MSVC; then COMPILER="wrapmsvc.exe"; fi
 
 AC_SUBST([ac_compiler_gnu])
 
@@ -529,13 +463,6 @@ SIM_AC_UNIQIFY_OPTION_LIST(SIMVOLEON_EXTRA_LIBS, $SIMVOLEON_EXTRA_LIBS)
 SIM_AC_UNIQIFY_LIST(CPPFLAGS, $CPPFLAGS)
 SIM_AC_UNIQIFY_LIST(LDFLAGS, $LDFLAGS)
 SIM_AC_UNIQIFY_LIST(LIBS, $LIBS)
-
-# **************************************************************************
-# Microsoft Developer Studio Project files
-
-SIM_AC_MSVC_DSP_SETUP([SIMVOLEON], [SIM Voleon], [simvoleon], [-I$simvoleon_build_dir/lib -I$simvoleon_src_dir/lib])
-
-# *******************************************************************
 
 AC_OUTPUT([
         SIMVoleon.pc
@@ -558,17 +485,7 @@ AC_OUTPUT([
         lib/VolumeViz/render/3D/Makefile
         lib/VolumeViz/render/common/Makefile
         lib/VolumeViz/render/Pointset/Makefile
-        cfg/gendsp.sh
-        cfg/gendsp.pl
 ])
-
-if test -f cfg/gendsp.sh; then
-  chmod +x cfg/gendsp.sh
-fi
-
-if test -f cfg/gendsp.pl; then
-  chmod +x cfg/gendsp.pl
-fi
 
 # *******************************************************************
 

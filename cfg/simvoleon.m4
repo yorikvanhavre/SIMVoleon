@@ -19,7 +19,6 @@
 # < $sim_ac_simvoleon_ldflags     (extra flags the linker needs)
 # < $sim_ac_simvoleon_libs        (link library flags the linker needs)
 # < $sim_ac_simvoleon_version     (the libSimVoleon version)
-# < $sim_ac_simvoleon_msvcrt      (the MSVC++ C library SimVoleon was built with)
 # < $sim_ac_simvoleon_configcmd   (the path to simvoleon-config or "false")
 #
 # Authors:
@@ -88,7 +87,6 @@ if $sim_ac_simvoleon_desired; then
     sim_ac_simvoleon_cxxflags=`$sim_ac_simvoleon_configcmd --cxxflags`
     sim_ac_simvoleon_ldflags=`$sim_ac_simvoleon_configcmd --ldflags`
     sim_ac_simvoleon_libs=`$sim_ac_simvoleon_configcmd --libs`
-    sim_ac_simvoleon_msvcrt=`$sim_ac_simvoleon_configcmd --msvcrt`
     sim_ac_simvoleon_cflags=`$sim_ac_simvoleon_configcmd --cflags`
     AC_CACHE_CHECK(
       [if we can compile and link with the SimVoleon library],

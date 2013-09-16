@@ -31,17 +31,10 @@ PrivateHeaders = \
 
 # **************************************************************************
 
-if BUILD_WITH_MSVC
-noinst_LIBRARIES = elements.lst
-else
 noinst_LTLIBRARIES = libelements.la
-endif
 
 libelements_la_SOURCES = $(RegularSources)
 EXTRA_libelements_la_SOURCES = $(PublicHeaders) $(PrivateHeaders)
-
-elements_lst_SOURCES = $(RegularSources)
-EXTRA_elements_lst_SOURCES = $(PublicHeaders) $(PrivateHeaders)
 
 # **************************************************************************
 
@@ -54,11 +47,6 @@ endif
 libelementsinc_HEADERS = $(PublicHeaders)
 
 # **************************************************************************
-
-elements.lst: $(elements_lst_OBJECTS)
-	@echo "Linking $@..."; \
-	rm -f $@; \
-	for i in $(elements_lst_OBJECTS); do echo $$i >>$@; done
 
 install-libelementsincHEADERS: $(libelementsinc_HEADERS)
 	@$(NORMAL_INSTALL)

@@ -7,11 +7,7 @@ DEFAULT_INCLUDES = -I$(top_builddir)/lib -I$(top_srcdir)/lib
 
 # **************************************************************************
 
-if BUILD_WITH_MSVC
-lib_LIBRARIES = simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@.lib
-else
 lib_LTLIBRARIES = libSimVoleon@SUFFIX@.la
-endif
 
 # On Mac OS 10.2 or later, create two-level namespace binaries and use
 # prebinding. Also pad the install_name to make it possible to change it
@@ -39,7 +35,6 @@ Sources = dummy.cpp \
 	Coin/gl/CoinGLPerformance.h
 
 libSimVoleon@SUFFIX@_la_SOURCES = $(Sources)
-simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@_lib_SOURCES = $(Sources)
 
 # **************************************************************************
 
@@ -55,59 +50,18 @@ libSimVoleon@SUFFIX@_la_LIBADD = \
         render/Pointset/libpointsetrender.la \
         render/common/libcommonrender.la
 
-simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@_lib_LIBADD = \
-	caches/caches.lst \
-	details/details.lst \
-	elements/elements.lst \
-	misc/misc.lst \
-	nodes/nodes.lst \
-	readers/readers.lst \
-	render/2D/2Drender.lst \
-        render/3D/3Drender.lst \
-        render/Pointset/pointsetrender.lst \
-        render/common/commonrender.lst
-
 libSimVoleon@SUFFIX@_la_LDFLAGS = \
         $(LibtoolLinkArgs) \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
-simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@.lib: Makefile \
-  $(simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@_lib_OBJECTS) \
-  $(simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@_lib_DEPENDENCIES)
-	@basename="simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@"; \
-	rm -f "$$basename.dll" "$$basename.lib"; \
-	echo "Linking $$basename.lib..."; \
-	echo $(CC) $(LDFLAGS) $(LIBFLAGS) \
-	  $(simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@_lib_OBJECTS) \
-	  $(simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@_lib_LIBADD) $(LIBS); \
-	$(CC) $(LDFLAGS) $(LIBFLAGS) \
-	  $(simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@_lib_OBJECTS) \
-	  $(simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@_lib_LIBADD) $(LIBS);
-
-
 # **************************************************************************
 
 CLEANFILES = \
-	simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@.pdb \
-	simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@.dll \
-	simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@.exp
+	simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@.dll
 
 # **************************************************************************
 
-if BUILD_WITH_MSVC
-install-exec-local: simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@.lib
-	@basename="simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@"; \
-	for ext in dll pdb; do \
-	  file="$$basename.$$ext"; \
-	  if test -s "$$file"; then \
-	    $(mkinstalldirs) "$(DESTDIR)$(bindir)"; \
-	    echo $(INSTALL_PROGRAM) "$$file" "$(DESTDIR)$(bindir)/$$file"; \
-	    $(INSTALL_PROGRAM) "$$file" "$(DESTDIR)$(bindir)/$$file" || exit 1; \
-	  fi \
-	done
-else
 install-exec-local:
-endif
 
 if MAC_FRAMEWORK
 install-data-local:
@@ -141,8 +95,6 @@ uninstall-local:
 	@basename="simvoleon@SIMVOLEON_MAJOR_VERSION@@SUFFIX@"; \
 	for file in \
 	  "$(DESTDIR)$(bindir)/$$basename.dll" \
-	  "$(DESTDIR)$(bindir)/$$basename.pdb" \
-	  "$(DESTDIR)$(libdir)/$$basename.lib" \
 	  "$(DESTDIR)$(MAC_FRAMEWORK_PREFIX)/$(MAC_FRAMEWORK_NAME).framework/$(MAKE_FRAMEWORK_NAME)"; do \
 	  if test -f "$$file"; then \
 	    echo " rm -f" "$$file"; \
