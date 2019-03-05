@@ -1,18 +1,18 @@
-NAME
+SIMVoleon - Volumetric rendering library for Coin3D
 
-SIM Voleon
+This repo is forked from https://github.com/Alexpux/SIMVoleon which is (apparently) itself forked from the official one at https://bitbucket.org/Coin3D/simvoleon which I couldn't clone because of some hg config issues I was too lazy to solve...
 
+SIMVoleon doesn't make use of cmake but rather of old-style configure & make system, which uses some old coin files that are no longer distributed in recent linux distros. So what I did here is add these needed coin files inside this repo, and modify the configure system so it finds them.
 
-BRIEF DESCRIPTION
+A note of warning, the coin-default.cfg included here was taken from the older libcoin80-dev package in debian, it works perfectly with libcoin80c currently in sid/buster. If you are using another distro, you might need to tweak some values inside.
 
-A volume rendering library for Coin.
+So with this repo, to compile simvoleon successfully, you need to do these steps:
 
+* Clone this repo
+* cd <directory where you cloned this repo>
+* /configure --prefix=/usr/local --with-coin=<directory where you cloned this repo>
+* make
+* make install (or use checkinstall)
 
-HOMEPAGE
+Next I'll try to compile pivy with it...
 
-http://dev.sim.no/SIM_Voleon
-
-
-LICENSE
-
-Licensed under the 3-clause BSD license.
